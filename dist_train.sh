@@ -1,0 +1,1 @@
+python train.py -c configs/config_lmdb.json -d 1 

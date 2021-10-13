@@ -1,0 +1,1 @@
+python train.py -c configs/config_lmdb_paddle.json -d 1 
