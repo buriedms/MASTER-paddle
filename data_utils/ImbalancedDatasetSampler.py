@@ -2,11 +2,16 @@ from collections import Counter
 from tqdm import tqdm
 from time import sleep
 
-import torch
-import torch.utils.data
-from torch.utils.data import Sampler,ConcatDataset
+# import torch
+# import torch.utils.data
+# from torch.utils.data import Sampler,ConcatDataset
+
+from paddle.io import Dataset,Sampler
+import paddle
 
 from data_utils.datasets import TextDataset,hierarchy_dataset
+from data_utils.ConcatDataset import *
+
 
 
 class ImbalancedDatasetSampler(Sampler):
@@ -28,7 +33,7 @@ class ImbalancedDatasetSampler(Sampler):
         for m_label in all_labels:
             weights.append(
                 total_characters / (sum([character_counter.get(m_char) for m_char in m_label]) / len(m_label)))
-        self.weights = torch.DoubleTensor(weights)
+        self.weights =  paddle.to_tensor(weights).astype(paddle.float64)
 
     def _get_labels(self, _dataset):
         if isinstance(_dataset, TextDataset):
@@ -45,7 +50,7 @@ class ImbalancedDatasetSampler(Sampler):
         return labels
 
     def __iter__(self):
-        return (i for i in torch.multinomial(self.weights, self.num_samples, replacement = True))
+        return (i for i in paddle.multinomial(self.weights, self.num_samples, replacement = True))
 
     def __len__(self):
         return self.num_samples
