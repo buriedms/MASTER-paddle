@@ -63,22 +63,21 @@ class MultiAspectGCAttention(nn.Layer):
                 nn.Conv2D(self.planes, self.inplanes, kernel_size=1))
 
     def spatial_pool(self, x):
-        batch, channel, height, width = x.size()
+        batch, channel, height, width = x.shape
         if self.pooling_type == 'att':
             # [N*headers, C', H , W] C = headers * C'
-            x = x.view(batch * self.headers, self.single_header_inplanes, height, width)
+            x = x.reshape([batch * self.headers, self.single_header_inplanes, height, width])
             input_x = x
 
             # [N*headers, C', H * W] C = headers * C'
-            # input_x = input_x.view(batch, channel, height * width)
-            input_x = input_x.view(batch * self.headers, self.single_header_inplanes, height * width)
+            input_x = input_x.reshape([batch * self.headers, self.single_header_inplanes, height * width])
 
             # [N*headers, 1, C', H * W]
             input_x = input_x.unsqueeze(1)
             # [N*headers, 1, H, W]
             context_mask = self.conv_mask(x)
             # [N*headers, 1, H * W]
-            context_mask = context_mask.view(batch * self.headers, 1, height * width)
+            context_mask = context_mask.reshape([batch * self.headers, 1, height * width])
 
             # scale variance
             if self.att_scale and self.headers > 1:
@@ -93,7 +92,7 @@ class MultiAspectGCAttention(nn.Layer):
             context = paddle.matmul(input_x, context_mask)
 
             # [N, headers * C', 1, 1]
-            context = context.view(batch, self.headers * self.single_header_inplanes, 1, 1)
+            context = context.reshape([batch, self.headers * self.single_header_inplanes, 1, 1])
         else:
             # [N, C, 1, 1]
             context = self.avg_pool(x)
@@ -122,7 +121,7 @@ class MultiAspectGCAttention(nn.Layer):
             _, C1, _, _ = channel_concat_term.shape
             N, C2, H, W = out.shape
 
-            out = paddle.concat([out, channel_concat_term.expand(-1, -1, H, W)], axis=1)
+            out = paddle.concat([out, channel_concat_term.expand([-1, -1, H, W])], axis=1)
             out = self.cat_conv(out)
             out = nn.functional.layer_norm(out, [self.inplanes, H, W])
             out = nn.functional.relu(out)

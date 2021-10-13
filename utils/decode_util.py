@@ -2,9 +2,6 @@
 # @Author: Wenwen Yu
 # @Created Time: 10/4/2020 17:48
 
-
-import torch
-import torch.nn.functional as F
 from model.master import predict
 
 

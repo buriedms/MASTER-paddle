@@ -112,10 +112,10 @@ class MASTER(nn.Layer):
 
 
 def predict(_memory, _source, _decode_stage, _max_length, _sos_symbol, _eos_symbol, _padding_symbol):
-    batch_size = _source.size(0)
+    batch_size = _source.shape[0]
     device = _source.device
     to_return_label = \
-        paddle.ones((batch_size, _max_length + 2), dtype=np.int64).to(device) * _padding_symbol
+        paddle.ones((batch_size, _max_length + 2), dtype=paddle.int64).to(device) * _padding_symbol
     probabilities = paddle.ones((batch_size, _max_length + 2), dtype=np.float32).to(device)
     to_return_label[:, 0] = _sos_symbol
     for i in range(_max_length + 1):

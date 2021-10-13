@@ -233,6 +233,6 @@ class ConvEmbeddingGC(nn.Layer):
     def forward(self, x):
         feature = self.backbone(x)
         b, c, h, w = feature.shape  # （B， C， H/8, W/4）
-        feature = feature.view(b, c, h * w)
-        feature = feature.permute((0, 2, 1))
+        feature = feature.reshape((b, c, h * w))
+        feature = feature.transpose((0, 2, 1))
         return feature

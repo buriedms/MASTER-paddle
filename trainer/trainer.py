@@ -246,7 +246,7 @@ class Trainer:
             # images = images.to(self.device)
             target = LabelTransformer.encode(text_label)
             # target = target.to(self.device)
-            target = target.permute(1, 0)
+            target = target.transpose([1, 0])
             # with torch.autograd.set_detect_anomaly(self.config['trainer']['anomaly_detection']):
             outputs = self.model(images, target[:, :-1])  # need to remove <EOS> in target
             loss = paddle.nn.functional.cross_entropy(outputs.reshape([-1, outputs.shape[-1]]),

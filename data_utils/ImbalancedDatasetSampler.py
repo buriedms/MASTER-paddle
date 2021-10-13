@@ -6,10 +6,10 @@ from time import sleep
 # import torch.utils.data
 # from torch.utils.data import Sampler,ConcatDataset
 
-from paddle.io import Dataset,Sampler
+from paddle.io import Sampler
 import paddle
 
-from data_utils.datasets import TextDataset,hierarchy_dataset
+from data_utils.datasets import TextDataset
 from data_utils.ConcatDataset import *
 
 

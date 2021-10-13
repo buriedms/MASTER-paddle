@@ -7,8 +7,8 @@ from itertools import repeat
 from collections import OrderedDict
 
 import numpy as np
-import torch
-
+# import torch
+import paddle
 
 def ensure_dir(dirname):
     dirname = Path(dirname)
@@ -34,23 +34,23 @@ def inf_loop(data_loader):
         yield from loader
 
 
-def check_parameters(module: torch.nn.Module):
+def check_parameters(module: paddle.nn.Layer):
     invalid_params = []
     for name, p in module.named_parameters():
-        is_invalid = torch.isnan(p).any() or torch.isinf(p).any()
+        is_invalid = paddle.isnan(p).any() or paddle.isinf(p).any()
         if is_invalid:
             invalid_params.append(name)
     return invalid_params
 
 
-def is_invalid(tensor: torch.Tensor):
-    invalid = torch.isnan(tensor).any() or torch.isinf(tensor).any()
+def is_invalid(tensor: paddle.Tensor):
+    invalid = paddle.isnan(tensor).any() or paddle.isinf(tensor).any()
     return invalid
 
 
-def binary_accuracy(output: torch.Tensor, target: torch.Tensor) -> float:
+def binary_accuracy(output: paddle.Tensor, target: paddle.Tensor) -> float:
     """Computes the accuracy for binary classification"""
-    with torch.no_grad():
+    with paddle.no_grad():
         batch_size = target.size(0)
         pred = (output >= 0.5).float().t().view(-1)
         correct = pred.eq(target.view(-1)).float().sum()

@@ -39,10 +39,8 @@ def main(config: ConfigParser, local_master: bool, logger = None):
                                     transform = master_dataset.CustomImagePreprocess(img_h, img_w, convert_to_gray),
                                     convert_to_gray = convert_to_gray)
     train_sampler = DistributedSampler(train_dataset) \
-        if config['distributed'] else None
-
+        if config['distributed'] else ImbalancedDatasetSampler(train_dataset)
     is_shuffle = False
-    print(train_dataset)
     train_data_loader = config.init_obj('train_loader', paddle.io,
                                         dataset = train_dataset,
                                         batch_sampler = train_sampler,

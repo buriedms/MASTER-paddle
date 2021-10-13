@@ -22,8 +22,8 @@ def clones(_to_clone_module, _clone_times, _is_deep=True):
 
 
 def subsequent_mask(_target):
-    batch_size = _target.size(0)
-    sequence_length = _target.size(1)
+    batch_size = _target.shape[0]
+    sequence_length = _target.shape[1]
     return paddle.tril(paddle.ones((batch_size, 1, sequence_length, sequence_length), dtype=paddle.bool))
 
 
@@ -56,7 +56,7 @@ class MultiHeadAttention(nn.Layer):
         :return:
         """
 
-        d_k = _value.size(-1)
+        d_k = _value.shape[-1]
         score = paddle.matmul(_query, _key.transpose([0,1,3,2])) / math.sqrt(d_k)  # (N, h, seq_len, seq_len)
         if _mask is not None:
             # score = score.masked_fill(_mask == 0, -1e9)  # score (N, h, seq_len, seq_len)
@@ -66,7 +66,7 @@ class MultiHeadAttention(nn.Layer):
         return paddle.matmul(p_attn, _value), p_attn
 
     def forward(self, _query, _key, _value, _mask):
-        batch_size = _query.size(0)
+        batch_size = _query.shape[0]
 
         # do all the linear projections in batch from d_model => h x d_k
         # (N, seq_len, d_m) -> (N, seq_len, h, d_k) -> (N, h, seq_len, d_k)
@@ -124,7 +124,7 @@ class PositionalEncoding(nn.Layer):
         self.register_buffer('pe', pe)
 
     def forward(self, _input_tensor):
-        _input_tensor = _input_tensor + self.pe[:, :_input_tensor.size(1)]  # pe 1 5000 512
+        _input_tensor = _input_tensor + self.pe[:, :_input_tensor.shape[1]]  # pe 1 5000 512
         return self.dropout(_input_tensor)
 
 
@@ -155,7 +155,7 @@ class Encoder(nn.Layer):
         self.dropout.eval()
 
     def _generate_mask(self, _position_encode_tensor):
-        target_length = _position_encode_tensor.size(1)
+        target_length = _position_encode_tensor.shape[1]
         return paddle.ones((target_length, target_length))
 
     def forward(self, _input_tensor):
@@ -201,11 +201,10 @@ class Decoder(nn.Layer):
 
     def _generate_target_mask(self, _source, _target):
         target_pad_mask = (_target != self.padding_symbol).unsqueeze(1).unsqueeze(3)  # (b, 1, len_src, 1)
-        target_length = _target.size(1)
+        target_length = _target.shape[1]
         target_sub_mask = paddle.tril(
-            paddle.ones((target_length, target_length), dtype=paddle.uint8,)
-        )
-        source_mask = paddle.ones((target_length, _source.shape[1]), dtype=paddle.uint8)
+            paddle.ones((target_length, target_length))).astype(paddle.uint8)
+        source_mask = paddle.ones((target_length, _source.shape[1])).astype(paddle.uint8)
         target_mask = target_pad_mask.numpy() & target_sub_mask.astype(paddle.bool).numpy()
         return source_mask, paddle.to_tensor(target_mask)
 

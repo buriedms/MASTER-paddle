@@ -114,6 +114,10 @@ class ConfigParser:
         module_args = dict(self[name]['args'])
         # assert all([k not in module_args for k in kwargs]), 'Overwriting kwargs given in config file is not allowed'
         module_args.update(kwargs)
+        if 'batch_sampler' in module_args:
+            if  module_args['batch_sampler'] is not None : \
+                    module_args['batch_size'],module_args['shuffle'],module_args['drop_last']=1,False,False
+
         return getattr(module, module_name)(*args, **module_args)
 
     def init_ftn(self, name, module, *args, **kwargs):

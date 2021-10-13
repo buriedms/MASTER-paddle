@@ -4,7 +4,7 @@
 import collections
 from pathlib import Path
 
-import torch
+import paddle
 
 STRING_MAX_LEN = 100
 VOCABULARY_FILE_NAME = 'keys.txt'
@@ -72,7 +72,7 @@ class LabelConverterForMASTER:
 
             nb = len(text)
 
-            targets = torch.zeros(nb, (local_max_length + 2))
+            targets = paddle.zeros([nb, (local_max_length + 2)])
             targets[:, :] = self.PAD
 
             for i in range(nb):
@@ -82,11 +82,14 @@ class LabelConverterForMASTER:
                         raise RuntimeError('Text is larger than {}: {}'.format(local_max_length, len(text[i])))
 
                 targets[i][0] = self.SOS  # start
-                targets[i][1:len(text[i]) + 1] = text[i]
+                print('i:',i)
+                print(text[i])
+                print(targets[i][1:len(text[i]) + 1])
+                print(len(text[i]))
+                targets[i][1:len(text[i]) + 1] = text[i].astype(paddle.float32)
                 targets[i][len(text[i]) + 1] = self.EOS
-            text = targets.transpose(0, 1).contiguous()
-            text = text.long()
-        return torch.LongTensor(text)
+            text = targets.transpose([1,0])
+        return paddle.to_tensor(text,dtype=paddle.int64)
 
     def decode(self, t):
         """Decode encoded texts back into strs.
@@ -100,7 +103,7 @@ class LabelConverterForMASTER:
         """
 
         # texts = list(self.dict.keys())[list(self.dict.values()).index(t)]
-        if isinstance(t, torch.Tensor):
+        if isinstance(t, paddle.Tensor):
             texts = self.alphabet_inverse_mapper[t.item()]
         else:
             texts = self.alphabet_inverse_mapper[t]

@@ -445,7 +445,7 @@ class ResizeWeight(object):
         self.gray_format = gray_format
 
     def __call__(self, img):
-        img_w, img_h = img.size
+        img_w, img_h = img.shape
 
         if self.gray_format:
             if img_w / img_h < 1.:
