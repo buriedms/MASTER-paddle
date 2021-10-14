@@ -16,6 +16,7 @@ from model.backbone import ConvEmbeddingGC
 from model.transformer import Encoder, Decoder
 from model.init import xavier_uniform_
 
+
 class Generator(nn.Layer):
     """
     Define standard linear + softmax generation step.
@@ -113,18 +114,17 @@ class MASTER(nn.Layer):
 
 def predict(_memory, _source, _decode_stage, _max_length, _sos_symbol, _eos_symbol, _padding_symbol):
     batch_size = _source.shape[0]
-    device = _source.device
     to_return_label = \
-        paddle.ones((batch_size, _max_length + 2), dtype=paddle.int64).to(device) * _padding_symbol
-    probabilities = paddle.ones((batch_size, _max_length + 2), dtype=np.float32).to(device)
+        paddle.ones((batch_size, _max_length + 2), dtype=paddle.int64) * _padding_symbol
+    probabilities = paddle.ones((batch_size, _max_length + 2), dtype=np.float32)
     to_return_label[:, 0] = _sos_symbol
     for i in range(_max_length + 1):
         m_label = _decode_stage(to_return_label, _memory)
         m_probability = paddle.nn.functional.softmax(m_label, axis=-1)
-        m_max_probs, m_next_word = paddle.max(m_probability, axis=-1),paddle.argmax(m_probability,axis=-1)
+        m_max_probs, m_next_word = paddle.max(m_probability, axis=-1), paddle.argmax(m_probability, axis=-1)
         to_return_label[:, i + 1] = m_next_word[:, i]
         probabilities[:, i + 1] = m_max_probs[:, i]
-    eos_position_y, eos_position_x = paddle.nonzero(to_return_label == _eos_symbol,as_tuple=True)
+    eos_position_y, eos_position_x = paddle.nonzero(to_return_label == _eos_symbol, as_tuple=True)
     if len(eos_position_y) > 0:
         eos_position_y_index = eos_position_y[0]
         for m_position_y, m_position_x in zip(eos_position_y, eos_position_x):
@@ -134,4 +134,3 @@ def predict(_memory, _source, _decode_stage, _max_length, _sos_symbol, _eos_symb
                 eos_position_y_index += 1
 
     return to_return_label, probabilities
-
