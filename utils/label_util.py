@@ -82,10 +82,6 @@ class LabelConverterForMASTER:
                         raise RuntimeError('Text is larger than {}: {}'.format(local_max_length, len(text[i])))
 
                 targets[i][0] = self.SOS  # start
-                print('i:',i)
-                print(text[i])
-                print(targets[i][1:len(text[i]) + 1])
-                print(len(text[i]))
                 targets[i][1:len(text[i]) + 1] = text[i].astype(paddle.float32)
                 targets[i][len(text[i]) + 1] = self.EOS
             text = targets.transpose([1,0])

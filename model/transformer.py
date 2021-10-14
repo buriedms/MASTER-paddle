@@ -71,7 +71,7 @@ class MultiHeadAttention(nn.Layer):
         # do all the linear projections in batch from d_model => h x d_k
         # (N, seq_len, d_m) -> (N, seq_len, h, d_k) -> (N, h, seq_len, d_k)
         _query, _key, _value = \
-            [l(x).view(batch_size, -1, self.h, self.d_k).transpose(1, 2)
+            [l(x).reshape([batch_size, -1, self.h, self.d_k]).transpose([0,2, 1,3])
              for l, x in zip(self.linears, (_query, _key, _value))]
 
         # apply attention on all the projected vectors in batch.
@@ -82,8 +82,7 @@ class MultiHeadAttention(nn.Layer):
 
         # "Concat" using a view and apply a final linear.
         # (N, seq_len, d_m)
-        x = x.transpose(1, 2).contiguous() \
-            .view(batch_size, -1, self.h * self.d_k)
+        x = x.transpose([0,2,1,3]).reshape([batch_size, -1, self.h * self.d_k])
 
         # (N, seq_len, d_m)
         return self.linears[-1](x)
