@@ -254,10 +254,10 @@ class Trainer:
                                                       ignore_index=LabelTransformer.PAD)
 
             # backward and update parameters
-
+            self.optimizer.clear_grad()
             loss.backward()
             # self.average_gradients(self.model)
-            self.optimizer.clear_grad()
+
             self.optimizer.step()
             ## Train batch done. Logging results
 
