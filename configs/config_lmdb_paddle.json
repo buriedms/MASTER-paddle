@@ -4,7 +4,7 @@
 
     "finetune":false,
 
-    "distributed":false,
+    "distributed":true,
     "local_world_size":1,
     "local_rank":-1,
     "global_rank":-1,
@@ -109,7 +109,7 @@
 
     "train_batch_size": 64,
     "val_batch_size": 64,
-    "train_num_workers": 0,
+    "train_num_workers": 1,
     "val_num_workers": 0,
 
     "save_dir": "../model_output/master_saved/",
